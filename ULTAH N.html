@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Moonlit Garden — Sebuah Perjalanan Spesial</title>
+    
+    <!-- Premium Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Great+Vibes&family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- External JS Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    <style>
+        /* ==========================================================================
+           1. CINEMATIC RESET & VARIABLES (MOBILE OPTIMIZED)
+           ========================================================================== */
+        :root {
+            --gold-primary: #D4AF37;
+            --gold-light: #F9E596;
+            --rose-gold: #B76E79;
+            --gold-glow: rgba(212, 175, 55, 0.35);
+            --bg-deep: #020305;
+            --bg-ambient: #07090F;
+            --glass-bg: rgba(10, 14, 20, 0.5);
+            --glass-border: rgba(212, 175, 55, 0.2);
+            --text-main: #FDFBF7;
+            --text-muted: rgba(253, 251, 247, 0.75);
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-tap-highlight-color: transparent; }
+
+        html, body {
+            width: 100%; height: 100%; overflow: hidden;
+            background-color: var(--bg-deep); color: var(--text-main);
+            font-family: 'Poppins', sans-serif;
+        }
+
+        /* ==========================================================================
+           2. ENVIRONMENT & AMBIENT
+           ========================================================================== */
+        #stage {
+            position: relative; width: 100vw; height: 100dvh; overflow: hidden;
+            background: radial-gradient(circle at 50% 25%, var(--bg-ambient) 0%, var(--bg-deep) 100%);
+            transition: background 3s ease-in-out, filter 3s ease;
+        }
+        
+        .stage-dimmed { background: radial-gradient(circle at 50% 25%, #010102 0%, #000000 100%) !important; }
+
+        #canvas-env { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2; pointer-events: auto; }
+
+        .aurora {
+            position: absolute; top: -30%; left: -30%; width: 160%; height: 160%;
+            background: radial-gradient(ellipse at 40% 30%, rgba(65, 105, 225, 0.04), transparent 50%),
+                        radial-gradient(ellipse at 60% 60%, rgba(138, 43, 226, 0.03), transparent 50%);
+            filter: blur(80px); z-index: 1; animation: auroraFloat 30s ease-in-out infinite alternate; pointer-events: none;
+        }
+
+        .moon {
+            position: absolute; top: 8%; right: 10%; width: 75px; height: 75px; border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #FFFDF0 0%, #EFE4D0 50%, #D0B788 100%);
+            box-shadow: 0 0 40px rgba(239, 228, 208, 0.15), inset -5px -5px 10px rgba(0,0,0,0.2);
+            z-index: 3; cursor: pointer; transition: all 1s ease;
+        }
+        .moon:hover { transform: scale(1.05); box-shadow: 0 0 50px rgba(239, 228, 208, 0.25); }
+
+        .fog {
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 40%;
+            background: linear-gradient(to top, rgba(2, 3, 5, 0.98), rgba(2, 3, 5, 0.25), transparent);
+            z-index: 4; pointer-events: none;
+        }
+
+        /* ==========================================================================
+           3. UI & GLASSMORPHISM (MOBILE SCALED)
+           ========================================================================== */
+        #scene-container {
+            position: relative; z-index: 10; width: 100%; height: 100%;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            padding: 20px; box-sizing: border-box;
+            transition: opacity 1.8s cubic-bezier(0.25, 1, 0.5, 1), transform 1.8s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        .scene-hidden { opacity: 0; transform: scale(0.96) translateY(15px); pointer-events: none; }
+        .scene-visible { opacity: 1; transform: scale(1) translateY(0); pointer-events: auto; }
+
+        .glass-card {
+            background: var(--glass-bg); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border); border-radius: 20px; padding: 35px 25px;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+            position: relative; width: 95%; max-width: 420px; text-align: center; margin: 0 auto;
+        }
+
+        .title {
+            font-family: 'Playfair Display', serif; font-size: clamp(2rem, 7vw, 2.6rem); font-weight: 600;
+            background: linear-gradient(135deg, #FFFDF0 0%, #F9E596 50%, var(--gold-primary) 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 12px; line-height: 1.25;
+            filter: drop-shadow(0 3px 8px rgba(212, 175, 55, 0.2));
+        }
+        .quote {
+            font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: clamp(1.2rem, 5vw, 1.5rem);
+            color: var(--gold-light); line-height: 1.6; opacity: 0.95;
+        }
+        .text-body { font-size: clamp(0.85rem, 3.5vw, 0.95rem); font-weight: 300; color: var(--text-muted); line-height: 1.7; }
+
+        .btn {
+            position: relative; display: inline-flex; align-items: center; justify-content: center;
+            padding: 14px 28px; background: linear-gradient(135deg, rgba(212, 175, 55, 0.08), rgba(255, 255, 255, 0.02));
+            backdrop-filter: blur(8px); border: 1px solid rgba(212, 175, 55, 0.4); border-radius: 30px;
+            color: #fff; font-family: 'Poppins', sans-serif; font-size: 0.9rem; font-weight: 500;
+            cursor: pointer; overflow: hidden; transition: all 0.4s ease;
+            width: 100%; max-width: 280px; margin-top: 25px; letter-spacing: 1px; text-transform: uppercase;
+        }
+        .btn:hover, .btn:active {
+            transform: translateY(-2px); background: linear-gradient(135deg, rgba(212, 175, 55, 0.15), rgba(255, 255, 255, 0.05));
+            border-color: var(--gold-primary); box-shadow: 0 10px 25px rgba(212, 175, 55, 0.3); color: var(--gold-light);
+        }
+
+        /* ==========================================================================
+           4. SCENE-SPECIFIC ELEMENTS
+           ========================================================================== */
+        
+        /* Realistic Envelope & Letter (Responsive) */
+        .envelope-container { perspective: 1000px; cursor: pointer; margin: 20px auto; width: 260px; height: 170px; transition: transform 0.6s ease; }
+        .envelope-container:active { transform: scale(0.95); }
+        .envelope {
+            position: relative; width: 100%; height: 100%; background: linear-gradient(145deg, #EFEBE0, #DCD6C8);
+            border-radius: 6px; box-shadow: 0 20px 40px rgba(0,0,0,0.8); transform-style: preserve-3d; transition: all 1s ease;
+        }
+        .env-flap {
+            position: absolute; top: 0; left: 0; width: 0; height: 0; border-left: 130px solid transparent; border-right: 130px solid transparent; border-top: 100px solid #FAF7F0;
+            transform-origin: top; transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1); z-index: 4; filter: drop-shadow(0 3px 4px rgba(0,0,0,0.15));
+        }
+        .env-seal {
+            position: absolute; top: 80px; left: 50%; transform: translateX(-50%); width: 50px; height: 50px;
+            background: radial-gradient(circle, #D4AF37, #9B7E20); border-radius: 50%; z-index: 5;
+            display: flex; justify-content: center; align-items: center; font-size: 1.2rem; color: #fff;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.4), inset 0 2px 4px rgba(255,255,255,0.4); border: 1px solid rgba(255,255,255,0.2);
+            transition: opacity 0.3s ease;
+        }
+        .envelope-container.open .env-flap { transform: rotateX(180deg); z-index: 1; }
+        .envelope-container.open .env-seal { opacity: 0; }
+        .envelope-container.open .envelope { transform: translateY(40px); opacity: 0; transition-delay: 0.7s; }
+
+        .letter-paper {
+            background: linear-gradient(145deg, #FDFBF7, #F5EFE6); color: #2C1A0E; border-radius: 8px; padding: 40px 25px 30px 25px;
+            text-align: left; box-shadow: 0 30px 60px rgba(0,0,0,0.9), inset 0 0 40px rgba(212, 175, 55, 0.05);
+            position: relative; max-width: 420px; width: 95%; display: none; opacity: 0; transform: translateY(20px); transition: all 1.2s ease;
+        }
+        .stamp-easter-egg { position: absolute; bottom: 20px; right: 20px; font-family: 'Great Vibes', cursive; font-size: 1.5rem; color: #A42828; border: 2px solid #A42828; padding: 4px 12px; border-radius: 6px; transform: rotate(-10deg) scale(1.2); opacity: 0; transition: all 0.5s ease; pointer-events: none; }
+        .stamp-easter-egg.revealed { opacity: 0.8; transform: rotate(-10deg) scale(1); }
+
+        /* Premium Photobook */
+        .photobook-container { position: relative; width: 250px; height: 340px; perspective: 1200px; margin: 10px auto 0; cursor: pointer; }
+        .photobook-page {
+            position: absolute; width: 100%; height: 100%; background: #FDFBF7; border-radius: 4px; padding: 12px 12px 60px 12px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.7), inset 0 0 15px rgba(0,0,0,0.04); transform-origin: left center;
+            transition: transform 1s cubic-bezier(0.64, 0.04, 0.35, 1), opacity 0.6s; transform-style: preserve-3d;
+        }
+        .photobook-page.flipped { transform: rotateY(-180deg); opacity: 0; pointer-events: none; }
+        .photo-img { width: 100%; height: 100%; object-fit: cover; border-radius: 3px; box-shadow: inset 0 0 8px rgba(0,0,0,0.2); }
+        .photo-frame { width: 100%; height: 100%; overflow: hidden; background: #000; border-radius: 3px; }
+        .photo-caption { position: absolute; bottom: 20px; left: 0; width: 100%; text-align: center; font-family: 'Cormorant Garamond', serif; font-size: 1.2rem; color: #2C1A0E; font-weight: 600; font-style: italic; }
+
+        /* Mini Game (9 Cards) */
+        .card-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 20px; max-width: 340px; width: 100%; margin-inline: auto; }
+        .flip-card { width: 100%; aspect-ratio: 1/1.1; cursor: pointer; perspective: 1000px; }
+        .flip-card-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); transform-style: preserve-3d; }
+        .flip-card.flipped .flip-card-inner { transform: rotateY(180deg); }
+        .flip-card-front, .flip-card-back {
+            position: absolute; width: 100%; height: 100%; -webkit-backface-visibility: hidden; backface-visibility: hidden;
+            border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 2rem; box-shadow: 0 8px 20px rgba(0,0,0,0.6);
+        }
+        .flip-card-front { background: rgba(15, 20, 30, 0.7); border: 1px solid var(--glass-border); color: var(--gold-primary); }
+        .flip-card-front:active { transform: scale(0.95); }
+        .flip-card-back { background: radial-gradient(circle, #FFFDF0 0%, #F4E8D1 100%); transform: rotateY(180deg); }
+        .flip-card-back.success { background: radial-gradient(circle, #FFD1DC 0%, #FFB6C1 100%); box-shadow: 0 0 20px rgba(255, 182, 193, 0.6); }
+
+        /* ==========================================================================
+           LUXURY 3D CAKE (Volumetric Cylinder Technique)
+           ========================================================================== */
+        .cake-container { margin: 30px auto; width: 240px; height: 250px; position: relative; perspective: 800px; display: flex; justify-content: center; align-items: flex-end; }
+        
+        /* Cake Stand */
+        .cake-stand { position: absolute; bottom: 0; width: 240px; height: 25px; background: linear-gradient(to right, #999, #e6e6e6, #fff, #b3b3b3, #888); border-radius: 120px / 30px; box-shadow: 0 15px 25px rgba(0,0,0,0.8); z-index: 1; }
+        .cake-stand::before { content: ''; position: absolute; top: -30px; left: 0; width: 100%; height: 60px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, #fff, #d9d9d9, #999); border: 1px solid rgba(255,255,255,0.6); }
+        
+        /* 3D Tiers */
+        .tier { position: absolute; left: 50%; transform: translateX(-50%); box-shadow: inset -15px 0 30px rgba(0,0,0,0.15), inset 10px 0 20px rgba(255,255,255,0.5); }
+        .tier::before { content: ''; position: absolute; left: 0; width: 100%; border-radius: 50%; box-shadow: inset 0 0 15px rgba(255,255,255,0.9); border: 1px solid rgba(212,175,55,0.3); }
+        
+        /* Gold Drip / Belt effect */
+        .tier::after { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 6px; background: linear-gradient(to right, #B76E79, #F9E596, #B76E79); border-radius: 0 0 50% 50% / 0 0 15px 15px; opacity: 0.85; }
+
+        .tier-1 { bottom: 20px; width: 180px; height: 80px; background: linear-gradient(to right, #D8C3A5, #FDF5E6, #FFFaf0, #FDF5E6, #C7B393); border-radius: 90px / 30px; z-index: 2; }
+        .tier-1::before { top: -30px; height: 60px; background: radial-gradient(circle at 40% 40%, #FFFaf0, #FDF5E6, #D8C3A5); }
+
+        .tier-2 { bottom: 95px; width: 130px; height: 70px; background: linear-gradient(to right, #D8C3A5, #FDF5E6, #FFFaf0, #FDF5E6, #C7B393); border-radius: 65px / 22px; z-index: 3; }
+        .tier-2::before { top: -22px; height: 44px; background: radial-gradient(circle at 40% 40%, #FFFaf0, #FDF5E6, #D8C3A5); }
+
+        .tier-3 { bottom: 160px; width: 90px; height: 60px; background: linear-gradient(to right, #D8C3A5, #FDF5E6, #FFFaf0, #FDF5E6, #C7B393); border-radius: 45px / 15px; z-index: 4; }
+        .tier-3::before { top: -15px; height: 30px; background: radial-gradient(circle at 40% 40%, #FFFaf0, #FDF5E6, #D8C3A5); }
+
+        /* 3D Decor Placement */
+        .cake-decor { position: absolute; font-size: 1.6rem; filter: drop-shadow(0 5px 8px rgba(0,0,0,0.5)); }
+        .decor-1 { bottom: 45px; left: 35px; z-index: 3; transform: rotate(-15deg); } /* Rose */
+        .decor-2 { bottom: 110px; right: 45px; z-index: 4; font-size: 1.5rem; transform: rotate(10deg); } /* Lily */
+        .decor-3 { bottom: 175px; left: 65px; z-index: 5; font-size: 1.3rem; transform: rotate(-5deg); } /* Tulip */
+
+        /* Premium Candle */
+        .candle-stick { position: absolute; bottom: 215px; left: 50%; transform: translateX(-50%); width: 8px; height: 40px; background: linear-gradient(to right, #e0e0e0, #fff, #d0d0d0); border-radius: 4px; z-index: 6; box-shadow: inset -2px 0 4px rgba(0,0,0,0.2), 3px 5px 5px rgba(0,0,0,0.3); }
+        .candle-stick::before { content:''; position:absolute; top:-4px; left:3px; width:2px; height:5px; background:#222; }
+        
+        .flame-wrapper { position: absolute; top: -35px; left: 50%; transform: translateX(-50%); transform-origin: bottom center; transition: all 0.5s ease; z-index: 7; }
+        .flame { width: 16px; height: 32px; background: radial-gradient(ellipse at bottom, #FFF 15%, #F9E596 40%, #FF4500 80%, transparent 100%); border-radius: 50% 50% 20% 20%; filter: drop-shadow(0 0 25px var(--gold-primary)); animation: flicker 0.12s infinite alternate; }
+        .flame-wrapper.blown-out { opacity: 0; transform: translateX(-50%) scale(0) translateY(-10px); }
+        .smoke { position: absolute; top: -10px; left: 50%; width: 12px; height: 12px; background: rgba(255,255,255,0.7); border-radius: 50%; opacity: 0; filter: blur(4px); pointer-events: none; }
+        .smoke.active { animation: riseSmoke 3.5s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
+        
+        .glass-input {
+            width: 100%; background: rgba(5, 8, 12, 0.6); border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 12px; padding: 18px; color: #FFF; font-family: 'Cormorant Garamond', serif; font-size: 1.2rem;
+            text-align: center; box-sizing: border-box; resize: none; outline: none; transition: 0.3s;
+            box-shadow: inset 0 4px 12px rgba(0,0,0,0.6); margin-bottom: 15px;
+        }
+        .glass-input:focus { border-color: var(--gold-primary); box-shadow: inset 0 4px 12px rgba(0,0,0,0.6), 0 0 20px rgba(212, 175, 55, 0.25); }
+
+        /* Cinematic Video Pre-roll & Post-roll */
+        #light-burst {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0);
+            width: 200vw; height: 200vw; background: radial-gradient(circle, #FFF 0%, var(--gold-light) 30%, transparent 70%);
+            opacity: 0; z-index: 50; pointer-events: none; mix-blend-mode: screen; transition: all 1.5s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        #light-burst.active { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+
+        #preroll-screen, #postroll-screen {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            opacity: 0; transition: opacity 1.5s ease; z-index: 45; background: var(--bg-deep);
+            pointer-events: none; padding: 20px; text-align: center;
+        }
+        #preroll-screen.active, #postroll-screen.active { opacity: 1; pointer-events: auto; }
+
+        /* VIP Pass (Scaled down slightly for mobile) */
+        .vip-pass { width: 100%; max-width: 380px; background: linear-gradient(145deg, #090B10, #030406); border: 1px solid rgba(212, 175, 55, 0.4); border-radius: 16px; padding: 25px; text-align: left; box-shadow: 0 30px 60px rgba(0,0,0,0.9), inset 0 0 30px rgba(212, 175, 55, 0.05); position: relative; overflow: hidden; margin: 0 auto; }
+        .vip-ribbon { position: absolute; top: 20px; right: -40px; background: linear-gradient(to right, var(--gold-primary), var(--gold-light)); color: #000; font-size: 0.65rem; font-weight: 700; padding: 4px 40px; transform: rotate(45deg); letter-spacing: 0.15em; box-shadow: 0 4px 10px rgba(0,0,0,0.4); }
+
+        /* Keyframes */
+        @keyframes auroraFloat { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(-20px, 20px) scale(1.05); } }
+        @keyframes flicker { 0% { transform: scale(0.95) rotate(-2deg); opacity: 0.85; } 100% { transform: scale(1.05) rotate(2deg); opacity: 1; } }
+        @keyframes riseSmoke { 0% { opacity: 0.9; transform: translateX(-50%) translateY(0) scale(1); } 100% { opacity: 0; transform: translateX(-50%) translateY(-100px) scale(5); } }
+        @keyframes fadeIn { from{opacity:0; transform:translateY(10px)} to{opacity:1; transform:translateY(0)} }
+        @keyframes shakeGift { 0%, 100% { transform: rotate(0deg); } 25% { transform: rotate(-12deg); } 50% { transform: rotate(12deg); } 75% { transform: rotate(-12deg); } }    </style>
+</head>
+<body>
+
+    <div id="stage">
+        <div class="aurora"></div>
+        <div class="moon" onclick="Engine.moonClick()"></div>
+        <div class="fog"></div>
+        <canvas id="canvas-env"></canvas>
+        <div id="light-burst"></div>
+        
+        <!-- Pre/Post Roll Cinematic Screens -->
+        <div id="preroll-screen">
+            <p class="quote" style="font-size: 1.6rem; color: #FFF; line-height: 1.6;">"Setiap detik bersamamu<br>adalah sebuah anugerah..."</p>
+        </div>
+        <div id="postroll-screen">
+            <p class="quote" style="font-size: 1.6rem; color: #FFF; line-height: 1.6; margin-bottom: 30px;">"Terima kasih telah menjadi bagian dari cerita yang indah ini.<br><br>Semoga senyummu terus menemani hari-hari esok."</p>
+            <button class="btn" style="max-width: 250px;" onclick="Engine.loadScene(7)">Terima Memory Pass 🎫</button>
+        </div>
+
+        <div id="scene-container" class="scene-hidden"></div>
+    </div>
+
+<!-- Konsep Bioskop Privat -->
+    <div id="cinema-modal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100dvh; background:#000; z-index:9999; flex-direction:column; justify-content:center; align-items:center;">
+        
+        <div id="cinema-container" style="width:100%; height:75%; position:relative;">
+            <!-- Video akan dimuat di sini secara dinamis -->
+        </div>
+
+        <!-- TOMBOL INI YANG DIUBAH -->
+        <button id="btn-finish-video" class="btn" style="position:absolute; bottom:40px; z-index:10000; max-width: 280px; border-color: var(--gold-primary); box-shadow: 0 0 25px rgba(212, 175, 55, 0.3); opacity: 0; pointer-events: none; transition: opacity 1.5s ease;" onclick="Engine.closeVideoAndContinue()">✨ Selesai Nonton & Lanjut</button>
+    </div>
+
+    <!-- Audio & SFX -->
+    <audio id="bgm" loop preload="auto">
+        <source src="https://files.catbox.moe/2a2pwm.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="sfx-page" preload="auto">
+        <source src="https://cdn.pixabay.com/download/audio/2022/03/10/audio_51770e0600.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- =======================================================================
+         SCENE TEMPLATES
+         ======================================================================= -->
+    <template id="scene-0">
+        <div style="display:flex; flex-direction:column; align-items:center;">
+            <div style="width:50px; height:50px; border:3px solid rgba(212, 175, 55, 0.05); border-top:3px solid var(--gold-primary); border-radius:50%; animation:spin 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite; margin-bottom:25px; box-shadow: 0 0 15px rgba(212,175,55,0.2);"></div>
+            <p class="text-body" style="letter-spacing:0.25em; font-size:0.75rem; color:var(--gold-light); opacity: 0.8; text-shadow: 0 2px 8px rgba(0,0,0,0.6);">MEMBANGUNKAN MALAM...</p>
+        </div>
+        <style>@keyframes spin { 100% { transform: rotate(360deg); } }</style>
+    </template>
+
+    <template id="scene-1">
+        <div class="glass-card">
+            <h1 class="title">Hai, Nadia 🌙</h1>
+            <p class="quote" style="margin-top:12px;">"Ada sebuah perjalanan kecil yang dirangkai khusus untukmu malam ini."</p>
+            <p class="text-body" style="margin-top:30px; font-size:0.8rem; opacity:0.6; letter-spacing: 1px;">🎧 Sangat disarankan menggunakan earphone.</p>
+            <button class="btn" onclick="Engine.startJourney()">✨ Mulai Perjalanan</button>
+        </div>
+    </template>
+
+    <template id="scene-2">
+        <div id="envelope-phase" style="width: 100%; text-align: center;">
+            <div class="envelope-container" id="envelope-wrapper" onclick="Engine.openEnvelope()">
+                <div class="envelope">
+                    <div class="env-flap"></div>
+                    <div class="env-seal">✨</div>
+                </div>
+            </div>
+            <p class="quote" style="margin-top:30px; font-size: 1.3rem;">Sebuah pesan menantimu...</p>
+            <p class="text-body" style="font-size: 0.75rem; margin-top: 5px; opacity: 0.5; letter-spacing: 2px;">(Sentuh untuk membuka)</p>
+        </div>
+
+        <div class="letter-paper" id="letter-phase">
+            <div style="text-align:center; font-size:1.8rem; color:var(--gold-primary); margin-bottom:15px; text-shadow: 0 1px 3px rgba(0,0,0,0.1);">✧</div>
+            <div id="typewriter-text" style="font-family:'Cormorant Garamond', serif; font-size:clamp(1.1rem, 4vw, 1.3rem); line-height:1.7; min-height:200px; color:#2C1A0E; font-weight: 500;"></div>
+            
+            <div class="stamp-easter-egg" id="sincerity-stamp">For You</div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 25px; min-height: 40px;">
+                <button id="btn-letter-prev" class="btn" style="padding: 8px 15px; width: auto; background:transparent; border:1px solid #2C1A0E; color:#2C1A0E; visibility:hidden; margin-top: 0; box-shadow: none;">Sebelumnya</button>
+                <button id="btn-letter-next" class="btn" style="padding: 8px 20px; width: auto; background:#2C1A0E; border:none; color:#FDFBF7; display:none; margin-top: 0;" onclick="Engine.nextLetterPage()">Selanjutnya 🤍</button>
+            </div>
+            <p class="text-body" style="font-size: 0.65rem; margin-top:15px; opacity: 0.4; text-align: center; color: #2C1A0E;">*Tahan surat untuk menemukan rahasia</p>
+        </div>
+    </template>
+
+    <template id="scene-3">
+        <div style="text-align: center; width: 100%;">
+            <h2 class="title" style="font-size:clamp(2rem, 6vw, 2.4rem); margin-bottom:5px;">Jejak Memori</h2>
+            <p class="text-body" style="margin-bottom:20px; opacity: 0.8;">Lembaran kenangan yang menolak dilupakan.</p>
+            
+            <div class="photobook-container" id="photobook"></div>
+            
+            <p class="text-body" style="font-size: 0.75rem; margin-top: 25px; opacity: 0.5; letter-spacing: 2px;">(Sentuh foto untuk membalik halaman)</p>
+            <button id="btn-album-next" class="btn" style="display: none; margin: 20px auto 0;" onclick="Engine.loadScene(4)">Melangkah Maju ✨</button>
+        </div>
+    </template>
+
+    <template id="scene-4">
+        <div class="glass-card">
+            <h2 class="title" style="font-size:clamp(1.8rem, 6vw, 2.2rem);">Taman Rahasia</h2>
+            <p class="text-body" style="margin-bottom:15px; opacity:0.9;">Temukan 3 bunga malam ini: <br><span style="color:var(--gold-light);">White Lily, Red Rose, Pink Tulip</span>.</p>
+            
+            <div class="card-grid" id="game-grid"></div>
+            
+            <div id="game-success" style="display:none; margin-top:25px; animation: fadeIn 1s ease;">
+                <p class="quote" style="color:var(--gold-primary); font-size:1.4rem; text-shadow: 0 0 15px rgba(212,175,55,0.4);">Keindahan telah mekar sempurna ✨</p>
+                <button class="btn" style="margin-top: 15px;" onclick="Engine.loadScene(5)">Lanjutkan Perjalanan</button>
+            </div>
+        </div>
+    </template>
+
+    <template id="scene-5">
+        <div class="glass-card" style="padding-bottom: 20px;">
+            <h2 class="title" style="font-size:clamp(1.8rem, 6vw, 2.2rem); margin-bottom:5px;">Make a Wish</h2>
+            <p class="text-body" style="margin-bottom:15px; opacity: 0.85;">Tuliskan satu doa yang paling kamu semogakan.</p>
+            
+            <div class="cake-container">
+                <div class="cake-stand"></div>
+                <div class="tier tier-1"></div>
+                <div class="tier tier-2"></div>
+                <div class="tier tier-3"></div>
+                <!-- 3D Decor Placement -->
+                <div class="cake-decor decor-1">🌹</div>
+                <div class="cake-decor decor-2">💮</div>
+                <div class="cake-decor decor-3">🌷</div>
+                <!-- Candle -->
+                <div class="candle-stick"></div>
+                <div class="flame-wrapper" id="cake-flame">
+                    <div class="flame"></div>
+                    <div class="smoke" id="cake-smoke"></div>
+                </div>
+            </div>
+
+            <div id="wish-phase-1" style="transition: opacity 0.8s ease;">
+                <textarea id="wish-input" class="glass-input" rows="2" placeholder="Tuliskan harapanmu..."></textarea>
+                <button class="btn" style="margin-top: 5px;" onclick="Engine.blowCandle()">💨 Tiup Lilin</button>
+            </div>
+            
+            <div id="wish-phase-2" style="display:none; opacity:0; transition: opacity 2s ease;">
+                <p class="quote" style="color:var(--gold-primary); margin-bottom:20px; font-size:1.4rem;">Harapanmu telah menyatu dengan malam.</p>
+                <button class="btn" style="box-shadow: 0 0 25px rgba(212, 175, 55, 0.25);" onclick="Engine.loadScene(6)">Buka Hadiah Terakhir 🎁</button>
+            </div>
+        </div>
+    </template>
+
+<template id="scene-6">
+    <div class="glass-card" id="gift-card" style="padding: 40px 25px; transition: opacity 1s ease;">
+        <div id="gift-wrapper">
+            <div id="gift-icon" style="font-size:6rem; cursor:pointer; transition:all 0.6s; filter:drop-shadow(0 0 35px var(--gold-glow));" onclick="Engine.openGiftAnim()">🎁</div>
+            <p class="quote" id="gift-quote" style="margin-top:30px; transition: opacity 0.5s ease;">Sentuh untuk membuka hadiah utama.</p>
+            
+            <!-- INI BAGIAN YANG HILANG SEBELUMNYA -->
+            <div id="btn-play-video-wrapper" style="display:none; margin-top:20px; opacity:0; transition: opacity 1s ease;">
+                <button class="btn" onclick="Engine.triggerVideoPreroll()">Lanjut ke Layar 🎬</button>
+            </div>
+        </div>
+        
+        <!-- Video Container -->
+        <div id="video-container" style="display:none; width:100%; opacity: 0; transition: opacity 1.5s ease; text-align: center;">
+            <p class="quote" style="margin-bottom:20px; font-size: 1.4rem;">Sebuah melodi memori telah menanti...</p>
+            
+            <button class="btn" style="margin-top: 10px; max-width: 250px;" onclick="Engine.openCinemaMode()">▶ Putar Video</button>
+        </div>
+    </div>
+</template>
+
+    <template id="scene-7">
+        <div class="vip-pass" id="memory-pass">
+            <div class="vip-ribbon">VIP PASS</div>
+            <h2 class="title" style="font-size:1.8rem; border-bottom:1px solid rgba(212, 175, 55, 0.2); padding-bottom:10px; margin-bottom:15px; text-shadow:none;">Moonlight Garden</h2>
+            <div style="font-size:0.85rem; line-height:2.4; font-family:'Poppins', sans-serif;">
+                <p style="border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 4px;"><span style="color:var(--text-muted); font-weight:300;">PASSENGER</span> <span style="color:#FFF; float:right; font-weight:500;">Nadia</span></p>
+                <p style="border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 4px; margin-top: 4px;"><span style="color:var(--text-muted); font-weight:300;">DATE</span> <span id="pass-date" style="color:#FFF; float:right;"></span></p>
+                <p style="border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 4px; margin-top: 4px;"><span style="color:var(--text-muted); font-weight:300;">STATUS</span> <span style="color:var(--gold-primary); float:right; font-weight:600;">Wishes Sent ✨</span></p>
+                <p style="margin-top: 4px;"><span style="color:var(--text-muted); font-weight:300;">SERIAL</span> <span style="color:#FFF; float:right; font-family:monospace; letter-spacing: 1px;">MG-26-884</span></p>
+            </div>
+            <div style="border-top:1px dashed rgba(212, 175, 55, 0.3); margin-top:20px; padding-top:15px; display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                    <p class="quote" style="font-size:1.1rem; color:var(--gold-primary); text-shadow:none;">"Teruslah Bersinar, Nadia."</p>
+                    <p style="font-size:0.65rem; color:rgba(255,255,255,0.5); font-weight:400; margin-top:5px; text-transform: uppercase; letter-spacing: 1px;">Signed by Febri</p>
+                </div>
+                <div id="qrcode" style="background:#fff; padding:5px; border-radius:6px;"></div>
+            </div>
+        </div>
+        
+        <div style="display:flex; gap:8px; width:100%; max-width:380px; margin-top:20px;">
+            <button class="btn" style="flex:1; padding:12px 5px; margin:0; font-size:0.75rem;" onclick="Engine.downloadPDF()">📄 PDF</button>
+            <button class="btn" style="flex:1; padding:12px 5px; margin:0; font-size:0.75rem; background:linear-gradient(135deg, rgba(37, 211, 102, 0.2), rgba(37, 211, 102, 0.05)); border-color: rgba(37,211,102,0.5);" onclick="Engine.shareWA()">💬 Share WA</button>
+            <button class="btn" style="flex:1; padding:12px 5px; margin:0; font-size:0.75rem;" onclick="window.location.reload()">🔄 Replay</button>
+        </div>
+    </template>
+
+    <script>
+        const Engine = (() => {
+            const container = document.getElementById('scene-container');
+            const bgm = document.getElementById('bgm');
+            const sfxPage = document.getElementById('sfx-page');
+            let canvasW, canvasH;
+            
+            // --- 1. PERFORMANCE OPTIMIZED CANVAS ---
+            const canvas = document.getElementById('canvas-env');
+            const ctx = canvas.getContext('2d');
+            let particles = [];
+
+            const resizeCanvas = () => {
+                canvasW = canvas.width = window.innerWidth;
+                canvasH = canvas.height = window.innerHeight;
+            };
+            window.addEventListener('resize', resizeCanvas);
+            resizeCanvas();
+
+            class Particle {
+                constructor(type) { this.type = type; this.reset(); }
+                reset() {
+                    if (this.type === 'star') {
+                        this.x = Math.random() * canvasW; this.y = -50;
+                        this.vx = Math.random() * 5 + 5; this.vy = Math.random() * 5 + 5;
+                        this.size = Math.random() * 1.5 + 0.5; this.life = 0; this.maxLife = Math.random() * 100 + 50;
+                    } else if (this.type === 'magic') {
+                        this.x = canvasW/2 + (Math.random()-0.5)*100; this.y = canvasH/2 + 80;
+                        this.vx = (Math.random() - 0.5) * 2; this.vy = -Math.random() * 2.5 - 1.5;
+                        this.size = Math.random() * 2.5 + 1; this.alpha = 1; this.life = 1;
+                    } else { // firefly
+                        this.x = Math.random() * canvasW; this.y = Math.random() * canvasH;
+                        this.vx = (Math.random() - 0.5) * 0.3; this.vy = (Math.random() - 0.5) * 0.3;
+                        this.size = Math.random() * 2 + 0.5; this.alpha = Math.random();
+                        this.clicked = false;
+                    }
+                }
+                update() {
+                    if (this.type === 'star') {
+                        this.x += this.vx; this.y += this.vy; this.life++;
+                        if (this.life > this.maxLife || this.y > canvasH || this.x > canvasW) this.reset();
+                    } else if (this.type === 'magic') {
+                        this.x += this.vx; this.y += this.vy; this.alpha -= 0.015;
+                        if(this.alpha <= 0) { this.x = -100; this.y = -100; }
+                    } else { // firefly
+                        this.x += this.vx; this.y += this.vy;
+                        if (this.x < 0 || this.x > canvasW) this.vx *= -1;
+                        if (this.y < 0 || this.y > canvasH) this.vy *= -1;
+                        this.alpha += (Math.random() - 0.5) * 0.04;
+                        if (this.alpha < 0.1) this.alpha = 0.1; if (this.alpha > 1) this.alpha = 1;
+                    }
+                }
+                draw() {
+                    if(this.alpha <= 0 && this.type === 'magic') return;
+                    ctx.save();
+                    if (this.type === 'star') {
+                        ctx.beginPath(); ctx.moveTo(this.x, this.y);
+                        ctx.lineTo(this.x - this.vx * 2.5, this.y - this.vy * 2.5);
+                        ctx.strokeStyle = `rgba(255, 255, 255, ${1 - (this.life / this.maxLife)})`;
+                        ctx.lineWidth = this.size; ctx.stroke();
+                    } else if (this.type === 'magic') {
+                        ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                        ctx.fillStyle = `rgba(212, 175, 55, ${this.alpha})`;
+                        ctx.shadowBlur = 10; ctx.shadowColor = '#D4AF37'; ctx.fill();
+                    } else { // firefly
+                        ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                        ctx.fillStyle = this.clicked ? `rgba(255, 255, 255, ${this.alpha + 0.5})` : `rgba(244, 232, 209, ${this.alpha})`;
+                        ctx.fill(); ctx.shadowBlur = this.clicked ? 15 : 8; ctx.shadowColor = this.clicked ? '#FFF' : 'rgba(244, 232, 209, 0.4)';
+                    }
+                    ctx.restore();
+                }
+            }
+
+            // Reduced particle count for mobile performance
+            for(let i=0; i<45; i++) particles.push(new Particle('firefly'));
+            setInterval(() => { if(Math.random() > 0.7) particles.push(new Particle('star')); }, 2500);
+
+            const animateCanvas = () => {
+                ctx.clearRect(0, 0, canvasW, canvasH);
+                particles.forEach(p => { p.update(); p.draw(); });
+                requestAnimationFrame(animateCanvas);
+            };
+            animateCanvas();
+
+            // --- 2. HELPERS ---
+            const triggerHaptic = () => { if (navigator.vibrate) navigator.vibrate(40); };
+            const moonClick = () => { triggerHaptic(); alert("✨ \"Bahkan di malam tergelap, bulan tetap menemukan cara untuk bersinar. Sama sepertimu.\""); };
+
+            // --- 3. SCENE LOGIC ---
+            const loadScene = (index) => {
+                triggerHaptic();
+                container.classList.remove('scene-visible');
+                container.classList.add('scene-hidden');
+                
+                // --- TAMBAHAN: Lanjutkan musik saat masuk ke Scene 7 (VIP Pass) ---
+                if (index === 7) {
+                    const bgmAudio = document.getElementById('bgm');
+                    if (bgmAudio && bgmAudio.paused) {
+                        bgmAudio.play().catch(e => console.log("Autoplay diblokir oleh browser"));
+                    }
+                }
+                // ------------------------------------------------------------------
+                
+                setTimeout(() => {
+                    const template = document.getElementById(`scene-${index}`);
+                    container.innerHTML = template.innerHTML;
+                    
+                    if (index === 2) { initLetter(); setupStampEasterEgg(); }
+                    if (index === 3) initPhotobook();
+                    if (index === 4) initGame();
+                    if (index === 7) setupPass();
+
+                    if (index === 7) { for(let i=0; i<20; i++) particles.push(new Particle('firefly')); }
+
+                    requestAnimationFrame(() => {
+                        container.classList.remove('scene-hidden');
+                        container.classList.add('scene-visible');
+                    });
+                }, 1000); 
+            };
+
+            const startJourney = () => {
+                            const bgmAudio = document.getElementById('bgm');
+                            if (bgmAudio) {
+                                bgmAudio.volume = 0.5;
+                                const playPromise = bgmAudio.play();
+                                if (playPromise !== undefined) {
+                                    playPromise.catch(error => {
+                                        console.log("Autoplay blocked:", error);
+                                    });
+                                }
+                            }
+                            
+                            // Berikan respons getar di HP (jika didukung)
+                            triggerHaptic();
+
+                            // Pindah ke scene berikutnya
+                            loadScene(2);
+                        };
+
+            // --- 4. POETIC LETTER ---
+            let currentLetterPage = 0;
+            let typeTimeout;
+            
+            const letterPages = [
+                "Hai, Nadia.\nSelamat bertambah usia.\n\nMungkin kamu bingung saat membuka ini. Aku hanya ingin memberi sesuatu yang sedikit berbeda—bukan sekadar ucapan lewat pesan, tapi ruang kecil yang tenang untukmu.",
+                "Di usiamu yang sekarang, ada pencapaian yang membuatmu tersenyum, tapi pasti ada juga beban tak terlihat yang diam-diam kamu bawa.\n\nAku menulis ini bukan untuk memaksamu selalu terlihat kuat.",
+                "Kita sama-sama tahu, tak semua hari berjalan seindah puisi. Akan ada hari yang terasa begitu berat.\n\nTidak apa-apa jika hari ini kamu hanya ingin beristirahat. Bertahan saat badai datang adalah keberanian yang hebat.",
+                "Semoga hal baik selalu datang di waktu yang tepat. Kalau suatu hari segalanya tak berpihak, semoga kamu selalu punya satu alasan untuk tetap tersenyum.\n\nTerima kasih sudah bertahan dan menjadi dirimu.",
+                "Selamat ulang tahun. Semoga setiap doa dari lubuk hatimu yang paling dalam, menemukan jalan terindah untuk menjadi nyata."
+            ];
+
+            const initLetter = () => { currentLetterPage = 0; };
+
+            const openEnvelope = () => {
+                const wrapper = document.getElementById('envelope-wrapper');
+                if(!wrapper || wrapper.classList.contains('open')) return;
+                
+                triggerHaptic();
+                wrapper.classList.add('open');
+                
+                let originalVol = bgm.volume;
+                if(!bgm.paused) {
+                    let fadeOut = setInterval(() => {
+                        if (bgm.volume > 0.1) bgm.volume -= 0.05;
+                        else { clearInterval(fadeOut); bgm.playbackRate = 0.8; }
+                    }, 100);
+                }
+
+                setTimeout(() => {
+                    document.getElementById('envelope-phase').style.display = 'none';
+                    const letterPhase = document.getElementById('letter-phase');
+                    letterPhase.style.display = 'block';
+                    
+                    setTimeout(() => {
+                        letterPhase.style.opacity = '1';
+                        letterPhase.style.transform = 'translateY(0)';
+                        typeLetterPage(currentLetterPage);
+                        
+                        if(!bgm.paused) {
+                            bgm.playbackRate = 1.0;
+                            let fadeIn = setInterval(() => {
+                                if (bgm.volume < 0.5) bgm.volume += 0.05;
+                                else clearInterval(fadeIn);
+                            }, 100);
+                        }
+                    }, 50);
+                }, 1800); 
+            };
+
+            const typeLetterPage = (pageIndex) => {
+                const el = document.getElementById('typewriter-text');
+                const btnNext = document.getElementById('btn-letter-next');
+                const btnPrev = document.getElementById('btn-letter-prev');
+                
+                el.innerHTML = '';
+                btnNext.style.display = 'none';
+                btnPrev.style.visibility = pageIndex > 0 ? 'visible' : 'hidden';
+                
+                // Add click listener to Prev Button
+                btnPrev.onclick = prevLetterPage;
+                
+                clearTimeout(typeTimeout);
+
+                let text = letterPages[pageIndex];
+                let i = 0;
+                
+                const type = () => {
+                    if (i < text.length) {
+                        el.innerHTML += text.charAt(i) === '\n' ? '<br>' : text.charAt(i);
+                        i++;
+                        let speed = text.charAt(i) === '.' ? 250 : (text.charAt(i) === ',' ? 150 : 20 + Math.random() * 20);
+                        typeTimeout = setTimeout(type, speed);
+                    } else {
+                        setTimeout(() => {
+                            btnNext.innerText = pageIndex === letterPages.length - 1 ? "Buka Album 📖" : "Selanjutnya 🤍";
+                            btnNext.style.display = 'block';
+                            if(pageIndex === letterPages.length - 1) {
+                                btnNext.onclick = () => loadScene(3);
+                            }
+                        }, 400);
+                    }
+                };
+                typeTimeout = setTimeout(type, 600);
+            };
+
+            const nextLetterPage = () => {
+                triggerHaptic();
+                if(currentLetterPage < letterPages.length - 1) {
+                    currentLetterPage++;
+                    typeLetterPage(currentLetterPage);
+                }
+            };
+            
+            const prevLetterPage = () => {
+                triggerHaptic();
+                if(currentLetterPage > 0) {
+                    currentLetterPage--;
+                    typeLetterPage(currentLetterPage);
+                }
+            };
+
+            const setupStampEasterEgg = () => {
+                const paper = document.getElementById('letter-phase');
+                const stamp = document.getElementById('sincerity-stamp');
+                let pressTimer;
+                const start = () => { pressTimer = setTimeout(() => { stamp.classList.add('revealed'); triggerHaptic(); }, 1000); };
+                const cancel = () => { clearTimeout(pressTimer); };
+                paper.addEventListener('touchstart', start); paper.addEventListener('touchend', cancel);
+                paper.addEventListener('mousedown', start); paper.addEventListener('mouseup', cancel);
+            };
+
+            // --- 5. PREMIUM PHOTOBOOK ---
+            let currentPhoto = 0;
+            const photos = [
+                { url: 'https://lh3.googleusercontent.com/d/1MZE_BMHP9F1FNG01ZZAZw5LSKG5orW7U=s0', caption: '"Awal cerita..."' },
+                { url: 'https://lh3.googleusercontent.com/d/1MaczUUvJM8krcjBxJaLBpqwgHG53iGjT=s0', caption: '"Senyum hangatmu"' },
+                { url: 'https://lh3.googleusercontent.com/d/1Mba5nEBvWAwra6l2qAN-rMNGEZ9oaH7e=s0', caption: '"Momen berharga"' }
+            ];
+
+            const initPhotobook = () => {
+                currentPhoto = 0;
+                const container = document.getElementById('photobook');
+                container.innerHTML = '';
+                
+                for(let i = photos.length - 1; i >= 0; i--) {
+                    const page = document.createElement('div');
+                    page.className = 'photobook-page';
+                    page.style.zIndex = photos.length - i;
+                    page.innerHTML = `
+                        <div class="photo-frame">
+                            <img src="${photos[i].url}" class="photo-img" alt="Memory">
+                        </div>
+                        <div class="photo-caption">${photos[i].caption}</div>
+                    `;
+                    page.onclick = () => turnPage(page, i);
+                    container.appendChild(page);
+                }
+            };
+
+            const turnPage = (pageEl, index) => {
+                triggerHaptic();
+                sfxPage.currentTime = 0;
+                sfxPage.play().catch(e => {}); 
+                
+                pageEl.classList.add('flipped');
+                currentPhoto++;
+                
+                if (currentPhoto >= photos.length) {
+                    setTimeout(() => { document.getElementById('btn-album-next').style.display = 'block'; }, 600);
+                }
+            };
+
+            // --- 6. MINI GAME ---
+            let foundFlowers = 0;
+            const initGame = () => {
+                foundFlowers = 0;
+                const grid = document.getElementById('game-grid');
+                const cards = ['💮', '🌹', '🌷', '🌻', '🌼', '🌺', '🥀', '🍀', '🌸'];
+                cards.sort(() => Math.random() - 0.5); 
+                
+                cards.forEach((emoji) => {
+                    const card = document.createElement('div');
+                    card.className = 'flip-card';
+                    card.innerHTML = `<div class="flip-card-inner"><div class="flip-card-front">✧</div><div class="flip-card-back">${emoji}</div></div>`;
+                    card.onclick = () => {
+                        if (card.classList.contains('flipped') || foundFlowers === 3) return;
+                        
+                        card.classList.add('flipped');
+                        triggerHaptic();
+                        
+                        if (['💮', '🌹', '🌷'].includes(emoji)) { 
+                            foundFlowers++;
+                            card.querySelector('.flip-card-back').classList.add('success');
+                            
+                            if (foundFlowers === 3) {
+                                document.querySelectorAll('.flip-card').forEach(c => c.style.pointerEvents = 'none');
+                                setTimeout(() => { document.getElementById('game-success').style.display = 'block'; }, 800);
+                            }
+                        }
+                    };
+                    grid.appendChild(card);
+                });
+            };
+
+            // --- 7. MAKE A WISH (CINEMATIC) ---
+            const blowCandle = () => {
+                const input = document.getElementById('wish-input');
+                if(input && input.value.trim() === '') {
+                    input.style.borderColor = "#FF4500";
+                    setTimeout(() => input.style.borderColor = "rgba(212, 175, 55, 0.3)", 1000);
+                    return;
+                }
+
+                triggerHaptic();
+                document.getElementById('cake-flame').classList.add('blown-out');
+                document.getElementById('cake-smoke').classList.add('active');
+                document.getElementById('wish-phase-1').style.opacity = '0';
+                
+                const stage = document.getElementById('stage');
+                stage.classList.add('stage-dimmed');
+                
+                for(let i=0; i<15; i++) setTimeout(() => particles.push(new Particle('magic')), i*150);
+
+                setTimeout(() => {
+                    document.getElementById('wish-phase-1').style.display = 'none';
+                    const phase2 = document.getElementById('wish-phase-2');
+                    phase2.style.display = 'block';
+                    
+                    setTimeout(() => { phase2.style.opacity = '1'; }, 50);
+                    setTimeout(() => stage.classList.remove('stage-dimmed'), 1500);
+                }, 2500); 
+            };
+
+            // --- 8. PRE-ROLL & POST-ROLL VIDEO ---
+            // --- 8. PRE-ROLL & POST-ROLL VIDEO ---
+            const openGiftAnim = () => {
+                const icon = document.getElementById('gift-icon');
+                const quote = document.getElementById('gift-quote');
+                const btnWrapper = document.getElementById('btn-play-video-wrapper');
+                if(!icon) return;
+
+                icon.onclick = null; // Mencegah klik berulang
+                triggerHaptic();
+
+                // 1. Kotak bergoyang
+                icon.style.animation = 'shakeGift 0.4s ease-in-out infinite';
+
+                // 2. Pita terlepas
+                setTimeout(() => {
+                    icon.innerText = '🎀';
+                    triggerHaptic();
+                }, 1000);
+
+                // 3. Kotak terbuka & partikel cahaya muncul
+                setTimeout(() => {
+                    icon.style.animation = 'none';
+                    icon.innerText = '📦✨';
+                    icon.style.transform = 'scale(1.2)';
+                    triggerHaptic();
+
+                    const burst = document.getElementById('light-burst');
+                    if(burst) burst.classList.add('active');
+                    
+                    // Efek partikel menyebar
+                    for(let i = 0; i < 25; i++) {
+                        setTimeout(() => particles.push(new Particle('magic')), i * 40);
+                    }
+
+                    setTimeout(() => { if(burst) burst.classList.remove('active'); }, 1200);
+
+                    // 4. Tampil narasi singkat dan tombol putar video
+                    setTimeout(() => {
+                        quote.style.opacity = '0';
+                        setTimeout(() => {
+                            quote.innerHTML = 'Sebuah memori manis telah terbuka...';
+                            quote.style.opacity = '1';
+                            btnWrapper.style.display = 'block';
+                            setTimeout(() => { btnWrapper.style.opacity = '1'; }, 50);
+                        }, 500);
+                    }, 1000);
+                }, 2000);
+            };
+
+            const triggerVideoPreroll = () => {
+                triggerHaptic();
+                
+                // --- TAMBAHAN: Hentikan musik saat video bersiap diputar ---
+                const bgmAudio = document.getElementById('bgm');
+                if (bgmAudio && !bgmAudio.paused) {
+                    bgmAudio.pause();
+                }
+                // -----------------------------------------------------------
+                
+                const wrapper = document.getElementById('gift-wrapper');
+                if (wrapper) { wrapper.style.transform = 'scale(1.2)'; wrapper.style.opacity = '0'; }
+                
+                setTimeout(() => {
+                    // Tampilkan PREROLL SCREEN
+                    const sceneContainer = document.getElementById('scene-container');
+                    sceneContainer.classList.add('scene-hidden');
+                    
+                    const preroll = document.getElementById('preroll-screen');
+                    preroll.classList.add('active');
+                    
+                    // Tunggu 3 detik, sembunyikan preroll, lalu putar video
+                    setTimeout(() => {
+                        preroll.classList.remove('active');
+                        
+                        setTimeout(() => {
+                            if (wrapper) wrapper.style.display = 'none';
+                            sceneContainer.classList.remove('scene-hidden');
+                            
+                            const vidContainer = document.getElementById('video-container');
+                            if (vidContainer) {
+                                vidContainer.style.display = 'block';
+                                setTimeout(() => { 
+                                    vidContainer.style.opacity = '1'; 
+                                }, 100);
+                            }
+                        }, 1000);
+                    }, 3000);
+                }, 500);
+            };
+
+// --- FUNGSI BIOSKOP PRIVAT ---
+            const openCinemaMode = () => {
+                triggerHaptic();
+                
+                // Matikan musik latar
+                const bgmAudio = document.getElementById('bgm');
+                if (bgmAudio && !bgmAudio.paused) bgmAudio.pause();
+
+                const vidContainer = document.getElementById('video-container');
+                if (vidContainer) vidContainer.style.display = 'none';
+
+                const modal = document.getElementById('cinema-modal');
+                const container = document.getElementById('cinema-container');
+                const finishBtn = document.getElementById('btn-finish-video');
+                
+                finishBtn.style.opacity = '0';
+                finishBtn.style.pointerEvents = 'none';
+                
+                // MENGGUNAKAN HTML5 VIDEO BAWAAN HP DENGAN LINK CATBOX
+                container.innerHTML = `
+                    <video id="clean-video" playsinline controls style="position:absolute; top:0; left:0; width:100%; height:100%; background:#000; object-fit:contain;">
+                        <source src="https://files.catbox.moe/y95ovz.mp4" type="video/mp4">
+                    </video>
+                `;
+                
+                modal.style.display = 'flex';
+                modal.animate([{opacity: 0}, {opacity: 1}], {duration: 800, fill: 'forwards'});
+
+                // Otomatis memutar video
+                setTimeout(() => {
+                    const vid = document.getElementById('clean-video');
+                    if (vid) vid.play().catch(e => console.log("Harus klik tombol play secara manual"));
+                }, 500);
+
+                // Timer 52 detik untuk memunculkan tombol selesai
+                setTimeout(() => {
+                    finishBtn.style.opacity = '1';
+                    finishBtn.style.pointerEvents = 'auto';
+                }, 90000); 
+            };
+
+            // --- KODE YANG HILANG (TAMBAHKAN INI) ---
+            const closeVideoAndContinue = () => {
+                triggerHaptic();
+                
+                const modal = document.getElementById('cinema-modal');
+                
+                // Hapus iframe agar videonya benar-benar berhenti
+                document.getElementById('cinema-container').innerHTML = '';
+                
+                // Sembunyikan layar hitam
+                modal.animate([{opacity: 1}, {opacity: 0}], {duration: 500, fill: 'forwards'}).onfinish = () => {
+                    modal.style.display = 'none';
+                    loadScene(7); 
+                };
+            };
+
+            // --- 9. VIP PASS ---
+            const setupPass = () => {
+                const postroll = document.getElementById('postroll-screen');
+                if (postroll) postroll.classList.remove('active');
+
+                const today = new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' });
+                document.getElementById('pass-date').innerText = today;
+                
+                document.getElementById("qrcode").innerHTML = ""; 
+                new QRCode(document.getElementById("qrcode"), {
+                    text: "Happy Birthday Nadia - Made by Febri",
+                    width: 60, height: 60, colorDark : "#030406", colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.M
+                });
+            };
+
+            const downloadPDF = () => {
+                const pass = document.getElementById('memory-pass');
+                html2canvas(pass, { scale: 3, backgroundColor: '#030406' }).then(canvas => {
+                    const imgData = canvas.toDataURL('image/jpeg', 1.0);
+                    const pdf = new jspdf.jsPDF('p', 'mm', 'a4');
+                    const pdfWidth = pdf.internal.pageSize.getWidth();
+                    const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+                    pdf.addImage(imgData, 'JPEG', 10, 40, pdfWidth - 20, pdfHeight - 20);
+                    pdf.save("Moonlit-Garden-VIP.pdf");
+                });
+            };
+
+            // Share API (Images only, no caption)
+            const shareWA = async () => {
+                const pass = document.getElementById('memory-pass');
+                try {
+                    const canvas = await html2canvas(pass, { scale: 2, backgroundColor: '#030406' });
+                    canvas.toBlob(async (blob) => {
+                        const file = new File([blob], 'Memory-Pass.jpg', { type: 'image/jpeg' });
+                        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                            await navigator.share({ files: [file] }); 
+                        } else {
+                            const link = document.createElement('a');
+                            link.download = 'Memory-Pass.jpg';
+                            link.href = canvas.toDataURL('image/jpeg');
+                            link.click();
+                            alert("Gambar diunduh! Silakan kirim ke WhatsApp secara manual.");
+                        }
+                    }, 'image/jpeg', 0.9);
+                } catch (err) {
+                    alert("Gagal membagikan gambar. Gunakan fitur Download PDF.");
+                }
+            };
+
+            window.onload = () => { 
+                loadScene(0); 
+                setTimeout(() => loadScene(1), 3000); 
+
+                // TRIK AUTOPLAY: Putar musik pada sentuhan/klik PERTAMA di layar manapun
+                const startAudioOnFirstTouch = () => {
+                    if (bgm && bgm.paused) {
+                        bgm.volume = 0.5;
+                        bgm.play().then(() => {
+                            // Jika berhasil diputar, hapus pemanggil ini
+                            document.removeEventListener('click', startAudioOnFirstTouch);
+                            document.removeEventListener('touchstart', startAudioOnFirstTouch);
+                        }).catch(e => console.log("Menunggu interaksi user..."));
+                    }
+                };
+
+                // Pasang pemicu sentuhan awal
+                document.addEventListener('click', startAudioOnFirstTouch, { once: true });
+                document.addEventListener('touchstart', startAudioOnFirstTouch, { once: true });
+            };
+
+            return { startJourney, loadScene, blowCandle, openGiftAnim, triggerVideoPreroll, openCinemaMode, closeVideoAndContinue, downloadPDF, shareWA, moonClick, openEnvelope, nextLetterPage, prevLetterPage };
+        })();
+    </script>
+</body>
+</html>
